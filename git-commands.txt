@@ -1,0 +1,9 @@
+Stash:
+git stash save "commit"
+git stash list
+git stash show stash@{0}
+git stash pop 
+git stash apply
+git stash drop
+git stash clear
+
