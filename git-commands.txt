@@ -1,3 +1,28 @@
+Branch:
+	git branch
+	git branch -a
+	git branch new-branch
+	git checkout -b new-branch
+	git branch --merged
+	git merge new-branch
+	git branch mv branch new-branch
+	git branch --delete branch
+
+Undo:
+	working dir
+		git checkout -- file.txt
+
+	staging index
+		git reset HEAD file.txt
+
+	repository
+		git commit --amend 
+		git revert SHA1
+		git reset --soft SHA1
+		git reset --mixed SHA1
+		git reset --hard SHA1
+
+
 Stash:
 git stash save "commit"
 git stash list
