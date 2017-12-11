@@ -1,0 +1,75 @@
+Sorrendben felulirja a korabbit
+
+1. /lib/systemd/system
+2. /etc/systemd/system/
+3. /run/systemd/system/
+
+systemctl get-default
+systemctl set-default graphical.target
+systemctl set-default multi-user.target
+systemctl isolate multi-user.target
+
+systemctl tab tab
+systemctl list-units
+systemctl status 
+systemctl sysinit.target
+systemctl list-units -t service vagy
+systemctl -t service
+
+systemctl reboot
+systemct poweroff
+systemd-analyze  boot idot mutatja
+systemd-analyze critical-chain
+systemd-analyze blame -- idoigényt mutatja
+
+systemctl list-unit-files osszes unit file a rendszerben
+systemctl list-unit-files -t service
+systemctl list-unit-files --state=enabled 
+systemctl list-unit-files --state=enabled -t service
+systemctl list-unit-files --state=disabled
+systemctl list-unit-files -t timer
+
+service tipusu unitok
+cat /lib/systemd/system/apache2.service
+
+tilos az eredeti service file-t modositani
+systemctl edit service pl. apache2, nem az eredet config. file-t modositja.
+létrehoz egy override.conf filet az /etc/systemd/system/SERVICENAME.service.d/override.conf
+filet
+
+amit ide irsz, az felulbiralja azt, ami a gyáriban van
+csak azt kell beirni amit szeretnék felulbírálni!
+systemctl status apache mutatja az override.conf file-t, hogy ott van
+
+systemctl show apache2 beállításokat mutatja
+
+systemd-delta mutatja milyen felulbiralasok vannak a rendsezrben
+
+systemctl revert apache2 --visszaállítja a felulírás elotti állapotot
+
+MASKED - le van tiltva, blokkolva van. véletlenul sem indulhat el
+
+Naplózás:
+
+systemdnek van egy journalja (bejegyzésfolyam), ide kerul minden naplozás
+bináris formátumban van tárolva!
+journalctl-el le tudom kérdezni! grep-el nem.
+
+memoriába naplóz, ujraindításnál eltunik!
+mkdir -p /var/log/journal innentol kezdve ide ir, nem torlodik
+journalctl - minden megvan benne a bootol kezdve
+journalctl -b --legutobbi boot utáni logok
+
+journalctl -e --legvégét mutatja
+journalctl legelejét mutatja
+journalctl -ex plussz infot ad, metaadatokat is mutat
+journalct -f follow new infos
+journalctl -u ssh ssh bejegyzéseit mutatja
+journalctl -u -f -folyamatosan monitorozza
+
+Hibakeresés:
+systemctl --failed --all megmutatja a hibás unitokat, amik nem indultak el
+ezután journalctl -u service -x a kovetkezo lépés a hibakeresésben
+
+
+
