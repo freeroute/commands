@@ -1,3 +1,13 @@
+git diff
+	git diff
+	git diff --cached or --staged
+	git diff SHA1..SHA1
+	git diff --stats --summ
+	git show
+	git show SHA1
+	git show SHA1 --stats --summ --colorized
+
+
 Branch:
 	git branch
 	git branch -a
