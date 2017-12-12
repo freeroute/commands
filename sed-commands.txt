@@ -1,0 +1,560 @@
+Remove first/last word of lines of bash file
+
+sed 's/\w*.//' test 		\w* >>szót jelent  	. >>>első
+sed 's/\w*$//' test					>>>> $ utolsó
+
+----------------------------------------------------
+grep amigo test
+
+sed -n  's/amigo/amigo/p' test 
+sed -n 's/amigo/&/p' test 
+sed -n '/amigo/p' test 
+sed -nr '/^amigo$/p' test
+----------------------------------------------------
+Ignoring case in Search and Replace
+
+sed 's/Oksa/Bob/Ig' test 				>>> I=Ignore kis-nagybetű
+---------------------------------------------------
+Whole word match with Boundaries
+
+sed 's/\bamigo\b/oooo/g' test				>>>>whole word match, no partial match ---- \b keresett szó \b
+----------------------------------------------------
+Remove lines when Match is found
+
+sed '/oksa/d' test					>>>>d delete
+----------------------------------------------------
+Skip the first-n line
+
+sed '1! s/10/ooooo/g' test 				>>>>1!	első sort kihagyja a parancs végrehajtásból
+----------------------------------------------------
+Count lines in a Linux file
+
+sed -n '$=' file					>>>>>> cat file | wc -l
+sed '=' file						>>>>>= print line numbers
+sed '$=' file						>>>>>>= print line numbers,$ but!!! only print the last line number of the output
+----------------------------------------------------
+Head to display top of files
+
+head -n 10 file
+
+sed '10q' test						>>>>q mean quit
+sed '5,$d' test						>>>>4. sorig print, 5. sortól kezdev töröl minden sort. go to line 5 end delete from line 5
+----------------------------------------------------
+Print all lines
+
+sed '' file						>>>>> cat file
+----------------------------------------------------
+Print specific lines
+
+sed -r '/amigo/d' file					>>>>> delete lines contains amigo
+sed -r -n '/amigo/p' file				>>>>>csak azt a sort nyomtatja, amiben benne van amigo
+
+-----------------------------------------------------
+Counting lines
+
+sed '=' test | sed 'N;  s/\n/ /'			>>>>> N append, \n new line
+or
+sed '=' test | sed 'N; s/\n/----- /'
+
+-----------------------------------------------------
+Delete lines
+
+sed -r '2,4d' file					>>>>r regular expression, 2-3-4 sorokat törli
+sed -n -r '2,4p' test 					>>>>2-3-4 sorokon kívül a többi törli
+sed -r '/oksa/d' test					>>>>törli az oksa kif. tartalmazó sorok
+sed -r -n '/oksa/p' test				>>>>csak azt a sort nyomtatja amiben  benne van oksa
+----------------------------------------------------
+Delete empty lines
+
+sed '/^\s*$/d' file
+awk 'NF' file
+grep . file						>>>> . means any character
+---------------------------------------------------
+Cut the first n line from a file
+
+sed -n '1,5p' file>cutted_lines.txt
+head -n 5 file>cutted_lines.txt
+sed '3,$d' test
+*****************************************
+Cut the last n line from a line
+tail -n 5 file>cutted_lines.txt
+------------------------------------------
+Find occurance words in a file  --at the beginning ^ or at the end  $
+
+grep -n ^'amigo' test
+grep -n ^'amigo' -c test 
+grep -n 'amigo'$ -c test 
+----------------------------------------
+grep -n 'ami.' test 					find ami.....word. . = any character
+
+[....] >>>specifie a range
+grep -n '[0-3]' test 		találatot dob ahol előfordul 1 vagy 2 vagy 3
+----------------------------------------
+repeat last shell command
+
+!!
+---------------------------------------
+grep -n --color -w Tisza tisza.txt -c			--color: color the search pattern, -c count the founds lines,
+grep -n --color -v -w Tisza tisza.txt			-v: invert match
+---------------------------------------
+Remove lines contains digits
+
+sed '/[0-9]/d' rockyou.txt
+
+Using sed to remove all lines containing special characters , numbers, and spaces
+To delete any line that is not composed entirely of alphabetic characters, 
+you'd need to add start (^) and end ($) anchors
+
+sed '/^[[:alpha:]]*$/!d' file
+
+Instead, you could delete any line that contains at least one non-alphabetic character
+
+sed '/[^[:alpha:]]/d' file
+---------------------------------------
+Filter lines based on length using sed and grep
+
+sed -nr '/^.{101,149}$/p' infile    >>>>100-150 kozotti hosszúságú sorok megjelenítése
+
+root@Jabil:~/GYAKORLAS# sed -nr '/^.[a-z]{2,8}$/p' test    >>>>csak betűk, min2 max8
+root@Jabil:~/GYAKORLAS# sed -nr '/^.[0-9]{2,8}$/p' test    >>>>csak számok lehetnek a sorokban, min2 max8
+
+    -n: no printing
+
+The -n option will prevent to print anything unless an explicit request to print is found (^.{101,149}$ "Lines longer than 100(>=101) and smaller than 150 characters(<=149)"). The /p flag used as one way to turn printing back on.
+
+    -r: -r (--regexp-extended)
+
+The -r enables the Extended regular expressions. If you don't want to use it Here, you need to escape the curly braces. 
+Then the command would be sed -n '/^.\{101,149\}$/p' infile.
+
+    The ^ is just the anchor for beginning of line and the $ for end of line.
+
+    A single . matches any single character
+
+
+grep -E '^.{101,149}$' infile
+-E this is the same as sed's -r option but for grep command. So if you don't want to use is just escape the curly braces.
+------------------------------
+cut username only from mail field
+sed 's/@.*//g' file1 > file2
+sed -E 's/([a-z0-9]+)@.*/\1/ file
+awk -F@ '{print $1}' email.txt
+awk 'gsub("@.*", "") {print $0}' file
+awk 'gsub (/@.*/,"") {print $0}' email.txt 
+cut -d@ -f1 file
+awk '{ gsub(",","",$3); print $3 }' /tmp/data.txt
+
+lines:
+zauriel56@yahoo.com:a378c8c27c22ddcb476d81f70bbd4906:s^G$e
+gamer4@live.com:d8a0ca979363047dbbea3d8ce481ddd8:$hOd'
+theunkown71@aol.com:0e1a4ffada45ebb865d0a2fd9b34112d:*@v#
+----------------------------
+sed -E '1,2d; s/([a-zA-Z0-9._\-]+@[a-zA-Z.]+.[a-zA-Z]+):([a-z0-9]+)/\1/' httpizkis.ru.txt | less
+https://www.linuxquestions.org/questions/linux-newbie-8/sed-skip-or-delete-first-n-line-than-continue-4175613273/
+............................
+sed -E '1,72d' Nute\ UFSC\ Br.txt | perl -pe 's/(?<nori>\d+),(?<eva>[\w \(\)]+),(?<titi>\w+)/$+{nori}:$+{titi}/' | less
+------------------
+How do I delete the first n lines of an ascii file using shell commands?
+awk 'NR >3 {print}' httpizkis.ru.txt | less
+awk 'BEGIN{FS ="'\''"; OFS = ":::"} NR > 51 {print "Username:"$4}' uwos_original.sql | less 
+
+-------------------
+root@kali:~/Gyakorlas/raw_files.txt# awk '{gsub (",",":::::"); print $0}' ichatlatino.txt | less
+-------------------
+awk 'BEGIN{FS ="[, :]"} {print $1,$2,$3,$4}' test.txt 
+awk -F'[, :]' '{print $1,$2,$3,$4}' test.txt 
+awk -F"[, :]" '{print $1,$2,$3,$4}' test.txt
+-------------------
+awk -F"'" '{print $1, $2}' awk_test.txt
+awk 'BEGIN{ FS="['\'' ]"; OFS="\t"; } { print $1, $2, $3; }'
+------------------
+sed -E -n '/^[0-9]{5}$/p' /usr/share/wordlists/rockyou.txt | less
+awk '/^[0-9]{5}$/ {print $0}' /usr/share/wordlists/rockyou.txt | less
+
+awk '/^[0-9]{5}$/' /usr/share/wordlists/rockyou.txt
+awk '$1 ~ /^[0-9]{5}$/' /usr/share/wordlists/rockyou.txt
+awk 'length($0) ==5' /usr/share/wordlists/rockyou.txt | less
+awk '{print length ($2)}' marks.txt 
+
+----------------------------
+awk -F":" 'BEGIN{print "=============";  printf "%-8s %3s\n", "User", "UID"; print "============"  } NR==1, NR==10 {printf "%-8s %-3s\n", $1,$3}' /etc/passwd
+---------------------------
+Lookahead
+\d+(?= dollars) and (?=\d+ dollars)\d+ both match 100 in 100 dollars, but the first is more efficient because the engine needs to match \d+ only once.
+
+Negative Lookahead
+\d+(?! dollars) and (?!\d+ dollars)\d+ both match 100 in 100 pesos, but the first is more efficient because the engine needs to match \d+ only once.
+
+Lookbehind
+(?<=USD)\d{3} and \d{3}(?<=USD\d{3}) both match 100 in USD100, but the first is more efficient because the engine needs to match \d{3} only once.
+
+Negative Lookbehind
+(?<!USD)\d{3} and \d{3}(?<!USD\d{3}) both match 100 in JPY100, but the first is more efficient because the engine needs to match \d{3} only once. 
+------------------
+awk 'END{print NR}' file 		wc -l
+--------------------------
+statsgen /usr/share/wordlists/10k_most_common.txt  -o 10k_most_common.masks
+maskgen 10k_most_common.masks --targettime 600 --optindex -q -o 10k.hcmask
+https://thesprawl.org/projects/pack/
+-----------------------------------
+ifconfig eth0 | awk '{if(NR==2)print $2}'
+ifconfig eth0 | awk 'NR==2 {print $2}'
+-------------------------------
+
+awk 'BEGIN{var=0; print "Averages"} {var=$2+$3+$4+$5+$6; var=var/5; print $1, var}' Average.txt 
+
+-----------------------------
+(?i)               # Turn on case-insensitive mode
+
+Seven-Letter Word Containing "hay"
+Some examples may seem contrived, but having a small library of ready-made regex at your fingertips is fabulous.
+Search pattern: (?=\b\w{7}\b)\w*?hay\w*
+Traditional word (only letters): (?i)(?=\b[A-Z]{7}\b)\w*?hay\w*
+awk '/hay/ && length==7 {print $0}' /usr/share/wordlists/rockyou.txt | less
+
+In this pattern, in the lookup, you can see that I replaced \w{7} with [A-Z]{7}, which matches seven capital letters. 
+To include lowercase letters, we could have used [A-Za-z]{7}. Instead, we used the case insensitive modifier (?i). 
+Thanks to this modifier, the pattern can match "HAY" or "hAy" just as easily as "hay". 
+It all depends on what you want: regex puts the power is in your hands. 
+
+Line Contains both "bubble" and "gum"
+Search pattern: ^(?=.*?\bbubble\b).*?\bgum\b.*
+awk '/bubble/ && /gum/ {print $0}' /usr/share/wordlists/rockyou.txt | less
+
+Line Contains "boy" or "buy"
+Search pattern: \bb[ou]y\b
+awk '/boy/ || /buy/ {print $0}' /usr/share/wordlists/rockyou.txt| less 
+
+Find Repeated Words, such as "the the"
+Search pattern: \b([[:alpha:]]+)[ [:punct:]]+\1
+f you don't want the punctuation, just use an \s+ in place of [ [:punct:]]+.
+\b(\w+)\b\s+\1\b
+
+Remember that \s eats up any white-space characters, including newlines, 
+tabs and vertical tabs, so if this is not what you want use [ ]+ to specify space characters. 
+
+Line does Not Contain "boy"
+Search pattern: ^(?!.*boy).*
+
+Line Contains "bubble" but Neither "gum" Nor "bath"
+Search pattern: ^(?!.*gum)(?!.*bath).*?bubble.*
+
+Email Address
+Search pattern: (?i)\b[A-Z0-9._%+-]+@(?:[A-Z0-9-]+\.)+[A-Z]{2,6}\b
+
+Lookahead Example: Simple Password Validation
+1. The password must have between six and ten word characters \w
+2. It must include at least one lowercase character [a-z]
+3. It must include at least three uppercase characters [A-Z]
+4. It must include at least one digit \d
+
+(?=^\w{6,13}$)(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z]{3,}).*		repeated capital letters only
+^(?=.*[a-z])(?=.*[0-9])(?=(.*[A-Z]){3,})\w{6,13}$   ez a jó
+---------
+match a number with one to ten digits?
+\b\d{1,10}\b
+
+How can I match all lines except those that contain a certain word?
+(?m)^(?!.*?BadWord).*$
+(?m)^(?!.*?\bBadWord\b).*$
+
+Match numbers followed by letter or end of string
+\d+(?=[A-Z]|$)
+
+
+Insert text at the beginning (or end) of a line
+(?m)^
+(?m)$
+
+Alphanumeric Characters
+[^\W_]
+[a-zA-Z0-9]
+
+Binary Number
+[^\D2-9]+
+
+Any White-Space Character Except the Newline Character
+[^\S\n]
+
+Changing the File Extension
+Search pattern: ^(.*\.)[^.]+$
+Replace: \1rar
+
+I want to remove every digit that is followed by a non-digit"
+sed -r 's/[0-9]+([^0-9])/\1/g'
+
+Current
+a0ambrelola
+A0AMC0VL
+a0amdibeth
+a0amej11319
+a0Amelee1488
+a0amelia
+a0amelia1
+
+Output
+aambrelola
+AAMCVL
+aamdibeth
+aamej11319
+aAmelee1488
+aamelia
+aamelia1
+--------------
+remove backslash from protected slash \/ 	change  "\/" to "/"
+
+$P$DuOxmeTb7uGqNkkzenh6BqBu5OmpDF\/
+$P$DPUN9ULZv9ICq.o53w4Kk\/685Q7mdW0
+$P$DbHTs7pYRbB4s5sHzXh\/JK7kFa4SIT0
+
+sed -E 's/\\\//\//g' btqpass.txt | less
+tr -d "\\" <file | less
+sed -E 's/\\//g' file
+sed -E 's!\\/!/!g' file | less
+awk '{gsub (/\\/, ""); print $0}' wp_hashes.txt 	A regexp-et slash-ek közzé kell rakni.
+awk '{gsub (/\\/, ""); print}' wp_hashes.txt 
+awk 'NF{gsub (/\\/,""); print $0}' wordpress.txt 
+----------------
+freeroute@gmail.com >>> add 123 like freeroute123@gmail.com
+
+sed -E 's/^([a-zA-Z]+)/\1123/g' email_addresses.txt 
+sed -E 's/([a-zA-Z]+)(@.*)/\1123\2/g' email_addresses.txt
+--------------------
+linux environment
+printenv or env
+awk 'BEGIN { print ENVIRON["USER"] }' 	or LANG, HOME,etc...
+To find names of other environment variables, use env command.
+-------------------
+Another hccapx file (wolfwoman.hccapx - attached)
+wlanhcxinfo -i wolfwoman.hccapx -a -s -e -p -R -M
+e0b9e51a0979:ec1f725ad6a8:fa78697a97e00d5ba311a3f2f9a129a2:0000000000000001:00:Wolf Woman
+e0b9e51a0979:ec1f725ad6a8:fa78697a97e00d5ba311a3f2f9a129a2:0000000000000001:02:Wolf Woman
+e0b9e51a0979:ec1f725ad6a8:d9ac2f4d9d0ec3e56093ca2b2d6f47f5:0000000000000001:00:Wolf Woman
+e0b9e51a0979:ec1f725ad6a8:d9ac2f4d9d0ec3e56093ca2b2d6f47f5:0000000000000001:02:Wolf Woman
+
+wlanhcx2ssid -i wolfwoman.hccapx -2 fileoutusewithhashcat.hccapx or
+wlanhcx2ssid -i 30092_1507395358.hccapx -X igokat
+
+4 records read from wolfwoman.hccapx
+2 records written to fileoutusewithhashcat.hccapx
+
+root@kali:~# hashcat -m 2500 -a 0 fileoutusewithhashcat.hccapx /usr/share/wordlists/rockyou.txt 
+
+and there are 2 handshakes in the fileoutusewithhashcat.hccapx file.
+
+I need only 1 handshake (hashcat will be slow in case of more than 1 handshake)
+Is it possible to remove it with hcxtools?
+-------------------
+Hi.
+wlanhcx2ssid -i 30092_1507395358.hccapx -X igokat or
+Do it in 2 steps:
+$ wlanhcx2ssid -i wolfwoman.hccapx -2 wm2.hccapx
+> e0b9e51a0979:ec1f725ad6a8:fa78697a97e00d5ba311a3f2f9a129a2:000000000000=
+0001:02:Wolf Woman
+> e0b9e51a0979:ec1f725ad6a8:d9ac2f4d9d0ec3e56093ca2b2d6f47f5:000000000000=
+0001:02:Wolf Woman
+
+$ wlanhcx2ssid -i wm2.hccapx -n wm1.hccapx
+> e0b9e51a0979:ec1f725ad6a8:fa78697a97e00d5ba311a3f2f9a129a2:000000000000=
+0001:02:Wolf Woman
+
+Cheers
+Mike
+
+hccapx files doesn't contain a file header we can evaluate.
+So we must use options to get the information that we want from the conte=
+nce.
+
+cap files have a file header. wlancapinfo only reads this file header and=
+ displays
+the complete header informations. We need this informations to see if the=
+ cap is damaged
+or use a format that we cant read. In that case we must use a protocol an=
+alyzer
+(Walking threw the data of a cap file needs a powerfull protocol analyzer=
+ like
+wireshark).
+
+If the cap format is ok for us and we are able to read it, wlancap2hcx wi=
+ll to
+the rest for you (stripping that data you need).
+
+----------------------------------------
+awk 'length==6 {print $0}' /usr/share/wordlists/rockyou.txt | less
+awk '{print length ($1)}' test.txt 
+awk 'NR==1, NR==3 {print $0}' test.txt 		print lines betwenn 1-3
+awk 'NF {print $0}' test.txt 			or awk 'NF' test.txt --delete empty lines
+------------------------
+Insert character position 40 using sed/awk 
+f543ec4182900ab972ad2bf552008eafb3734a36bae914ac5e3e57f27aa323368
+5c0ad0579061fd839db877c2c7c854c57fb759ba9ec05f72cc619feafdf2f602c
+
+1. 	sed -E 's/^(.{40})/\1:/g' 			or
+2. 	sed -E 's/./&:/40' file 			or
+3. 	sed -E 's/^.{40}/&:/g' file			or
+awk '{sub( ".{40}", "&:"); print }' file		or
+awk '{sub (/.{40}/, "&:"); print }' file		or
+awk '{gsub (".{40}", "&:")} {print $0}' file
+
+f543ec4182900ab972ad2bf552008eafb3734a36:bae914ac5e3e57f27aa323368	Add a char after the 40th character
+5c0ad0579061fd839db877c2c7c854c57fb759ba:9ec05f72cc619feafdf2f602c
+
+sed -E 's/^./:&/40'							Add a char before the 40th character
+f543ec4182900ab972ad2bf552008eafb3734a3:6bae914ac5e3e57f27aa323368
+5c0ad0579061fd839db877c2c7c854c57fb759b:a9ec05f72cc619feafdf2f602c
+--------------------
+awk -F: 'match($4,/tux/) { print } ' /etc/group
+awk -F: 'match($2,/ert/) {print $0 }' test.txt 
+456:ert 12345:aswe
+------------------
+gpg
+https://www.phildev.net/pgp/gpg_moving_keys.html
+https://futureboy.us/pgp.html#ManualExporting
+-----------------
+print fields length
+awk -F: '{print length ($1), length ($2)}' 8Track_hashes 
+40 40
+---------------
+print lines length 10 chars and contain specific word
+perl -ne 'print if /^(?=.*edina)\w{7}$/'
+awk '/winter/ && length==10 {print $0}' /usr/share/wordlists/rockyou.txt	logikai és van benne
+awk '/edina/ && /^.{10}$/ {print $0}' /usr/share/wordlists/rockyou.txt | less
+awk '$1 ~ /^[0-9]{5}$/' /usr/share/wordlists/rockyou.txt	csak az első field-ben keres
+ perl -ne 'print if /^(?=.*edina)\w{7}$/'	7 karakter hosszú és legyen benne edina - positive lookahead
+ perl -ne 'print if /^(?!.*edina)\w{7}$/'	7 karakter hosszu és ne legyen benne edina - negative lookahead
+
+--------------
+regex perl - print 7 letters words only 
+sed -E -n '/^[a-zA-Z0-9]{7}$/p' file.txt
+perl -ne 'print if /^[[:alnum:]]{7}$/' file.txt		An alternate way to match any letter or digit. needs to be inside a [character class] notation.
+grep -E -owe '[[:alnum:]]{6}' file.txt
+awk 'length==7 {print $0}' file.txt
+---------------
+remove white space from the end of line in linux
+sed 's/ *$//' file
+sed 's/[[:blank:]]*$//' file		[[:blank:]] Matches spaces and tabs (but not newlines). needs to be inside a [character class] notation.
+sed -e 's/\s*$//g'
+awk 'gsub (/\s*$/,"") {print $0}' file
+-------------
+8Track hashes format
+sed -E 's/(.*:)(.*)/\1--\2--/' 8Track_hashes 
+sed -E 's/([[:xdigit:]]+:)([[:xdigit:]]+)/\1--\2--/' 8Track_hashes 
+14a3dd63ea16bf75e78d5a2af882025f6030de81:--b97b64ec9a5f171b700101062418349281e88d63--
+---------------
+convert raw hashes list to the correct format 	separator :, field $4 and $5 required
+awk 'BEGIN{FS=":"; OFS=":"} {print $4, $5}' vb_Nov10th.txt
+cut -d: -f 4,5 vb_Nov10th.txt 
+awk -F: '{print $4, $5}' vb_Nov10th.txt | tr " ", ":" > output.txt
+sed -E 's/[a-zA-Z0-9[:punct:] ]+:[^:]+:[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}:(.*)/\1/g' vb_Nov10th.txt
+------------
+Edmonto hashes
+cut --complement -c `seq -s ',' 2 2 64` Edmodo_hashes.txt 
+$2y$12$ZDJjZTI4MzlkOTljYjlmZeU0OFJk9iz8iCE5AODPQx4QkiQjJOVmG
+
+echo '$826y4$31226$dZbD2JfjeZ3TbIe44M0zclck2O4T1l8j7Y7jfl6maZ2ecU900ObFJk9iz8iCE5AODPQx4QkiQjJOVmG' | 
+cut --complement -c `seq -s ',' 2 2 64`
+
+cut -c 1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35,37,39,41,43,45,47,49,51,53,55,57,59,61,63- Edmodo_hashes.txt 
+$2y$12$ZDJjZTI4MzlkOTljYjlmZeU0ObFJk9iz8iCE5AODPQx4QkiQjJOVmG
+
+cut --complement -c 2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62 Edmodo_hashes.txt 
+$2y$12$ZDJjZTI4MzlkOTljYjlmZeU0ObFJk9iz8iCE5AODPQx4QkiQjJOVmG
+
+vagy a macerásabb:
+cut -c `seq -s ',' 1 2 63`,64- Edmodo_hashes.txt 
+$2y$12$ZDJjZTI4MzlkOTljYjlmZeU0ObFJk9iz8iCE5AODPQx4QkiQjJOVmG
+
+echo '$826y4$31226$dZbD2JfjeZ3TbIe44M0zclck2O4T1l8j7Y7jfl6maZ2ecU900ObFJk9iz8iCE5AODPQx4QkiQjJOVmG' | 
+cut -c `seq -s ',' 1 2 63`,64-
+-----------------
+
+cat cut_file 
+123456789
+
+cut the first 3 chars from a file
+cut -c -3 cut_file 
+123
+
+cut the 3rd char from a file, delete others!
+cut -c 3 file
+3
+
+cut the 3rd char from a file, than print others
+cut -c 3- file
+3456789
+
+cut every 2 chars
+cut -c 2,4,6,8 cut_file 
+2468
+
+cut every 2nd char until 6, than print others
+cut -c 2,4,6- cut_file 
+246789
+
+delete 3rd chars only, print others!
+cut --complement -c 3 cut_file 
+12456789
+
+delete 2nd, 4th, 6th chars and complete
+cut --complement -c 2,4,6 cut_file 
+135789
+
+delete 2nd, 4th, 6th and delete others
+cut --complement -c 2,4,6- cut_file 
+135
+-------------
+Print all uppercase:
+perl -ne 'print uc()' file
+
+    -n loop around input file, do not automatically print line
+    -e execute the perl code in quotes
+    - uc() = uppercase
+
+Print all lowercase:
+perl -ne 'print lc()' file
+----------------------------------
+sed
+* \L – convert all proceeding characters to lowercase
+* \U – convert all proceeding characters to uppercase
+* \E – leave all proceeding characters in their current case
+root@Xenon-XR2:~/Gyakorlas# sed -E 's/.*/\L&/' Edmodo_hashes.txt 
+$826y4$31226$dzbd2jfjez3tbie44m0zclck2o4t1l8j7y7jfl6maz2ecu900obfjk9iz8ice5aodpqx4qkiqjjovmg
+
+root@Xenon-XR2:~/Gyakorlas# sed -E 's/.*/\U&/' Edmodo_hashes.txt 
+$826Y4$31226$DZBD2JFJEZ3TBIE44M0ZCLCK2O4T1L8J7Y7JFL6MAZ2ECU900OBFJK9IZ8ICE5AODPQX4QKIQJJOVMG
+-----------
+create year-digits rules
+ for i in {1950..2017}; do echo $i | sed -E 's/(.)/$\1 /g'; done >1940-2017.rule
+
+creating year-digits dictionary
+for i in {1950..2017}; do echo $i; done >1940-2017.txt
+---------------
+echo -e {1950..2017}"\n"	every yeat to newline
+echo {01..20..2}
+seq 01 2 20
+--------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+					
