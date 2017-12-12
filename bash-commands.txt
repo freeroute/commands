@@ -1,0 +1,29 @@
+expr 10 + 10
+expr 10 \* 10
+expr length dsafdadaas		evaluate string length
+expr substr string 1 5 		print from 1 to 5 chars
+
+command & 	run background
+
+read firstname lastname
+echo $firstname $lastname
+
+set | grep firstname
+set | grep lastname
+
+unset firstname
+unset lastname
+
+touch file_{01..20..3}.txt
+mkdir dir{01..20..3}
+
+rm -rf file_*{01..20..3}
+
+cat -A file	show spaces, tabs too
+cat -T file	show tabs too
+
+command() { ls -lh
+		}
+vagy
+command() { ls -lh ;}	pl. .bashrc-be parancs bevitele, nem alias
+
