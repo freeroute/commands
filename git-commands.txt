@@ -1,5 +1,6 @@
 git diff
-	git diff
+	git diff file
+	git diff --color-words
 	git diff --cached or --staged
 	git diff SHA1..SHA1
 	git diff --stats --summ
@@ -7,20 +8,63 @@ git diff
 	git show SHA1
 	git show SHA1 --stats --summ --colorized
 
+Rename
+	git mv file.txt new-file.txt
+		git status
+
 Ignoring files
 	.gitignore	git add -A, git commit -m "message" is kell utána
+	git rm --cached file.txt	remove file from the staging index
 
-Branch:
-	git branch
-	git branch -a
-	git branch new-branch
-	git checkout -b new-branch
-	git branch --merged
+Branches>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+	git branch	show branches on local machine
+	git branch new-branch	create new-branch
+	git checkout branch	switch to branch
+	git checkout -b new-branch 	create new-branch and checkout to new-branch
+	git branch -a 	show all local and remote branches
 	git merge new-branch
 	git branch mv branch new-branch
 	git branch --delete branch
+	
++	Comparing branches
+		git diff master..new-branch	.. range operator
+		git diff --color-words master..new-branch
+		git branch --merged
 
-Undoing changes on 
++	Rename branches
+		git branch --move old-branch renamed-branch
+		git branch -m 
+
++	Deleting branches
+		git branch --delete branch
+		git branch -d branch
+
++	Merge branches
+		git merge new-branch	
+		git branch --merged	show merged branches
+			git log
+			git diff master..new-branch
+ 
+Fast-forward merges vs. real-merges
+
+	git merge --no-ff branch	no-fastforward -- make a new commit anyway
+	git merge --ff-only branch	do a fastforward only, if not possible quit!
+
+Merge conflicts
+
++	git merge --abort		abort merge branches
+
+Manually
++	git log --oneline -3
+	git show SHA1 	megmutatja mi modosult
+
+Merge tool
++	git merge-tool	list merge tools
+	git merge-tool --tool=xxxxx
+	
+Undoing changes on>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+ 
 	Working dir
 		git checkout -- file.txt
 
@@ -37,12 +81,58 @@ Undoing changes on
 		git reset --hard SHA1	move the pointer back and change staging index and working directory to match repository
 
 
-Stash:
-git stash save "commit"
-git stash list
-git stash show stash@{0}
-git stash pop 
-git stash apply
-git stash drop
-git stash clear
+Remove untracked files from working directory
+	git clean -n 	dry run, info what to remove
+	git clean -f	remove, permanently delete
+
+
+
+Saving changes in the stash:
+
+		git stash save "commit"
+		git stash show -p stash@{0}
+	
+	Retrieving stashes
+		git stash list		list stashed files
+		git stash pop 	move stash back to the working directory
+		git stash apply	move stash back to the working directory + leave a copy in a stash
+	
+	Deleting stashes
+		git stash drop	or
+		git stash drop stash@{0}
+		git stash clear		remove all the stashes!
+
+Remote repositories:
+
+		git remote		list all remotes
+		git remote add <alias> url
+		git remote -v 		list all remotes verbose
+		git remote rm alias	delete alias 
+
+	Create remote branch
+		git push -u <alias> master
+		git branch -r 	list remote branches
+		git branch -a list all branches, local and remote
+
+	Clone remote repository
+		git clone url.git
+		git clone url.git .		do not create directory, only download and save files
+
+	Pushing changes to remote repository
+		git push origin master
+
+	Fetching changes from remote repository
+		git fetch origin  or
+		git fetch
+
+	Merging in fethces changes
+		git merge origin/master
+
+		git pull = git fetch + git merge !!!!!!!!!!
+
+	Delete remote branches
+		git push origin --delete branch
+		git push origin:branch
+
+
 
