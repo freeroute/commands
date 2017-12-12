@@ -7,6 +7,8 @@ git diff
 	git show SHA1
 	git show SHA1 --stats --summ --colorized
 
+Ignoring files
+	.gitignore	git add -A, git commit -m "message" is kell utána
 
 Branch:
 	git branch
@@ -18,19 +20,21 @@ Branch:
 	git branch mv branch new-branch
 	git branch --delete branch
 
-Undo:
-	working dir
+Undoing changes on 
+	Working dir
 		git checkout -- file.txt
 
-	staging index
+	Staging index (un-stage things)
 		git reset HEAD file.txt
 
-	repository
-		git commit --amend 
-		git revert SHA1
-		git reset --soft SHA1
-		git reset --mixed SHA1
-		git reset --hard SHA1
+	Repository itself
+		git commit --amend -m "message"
+		git checkout SHA1 -- file.txt 	SHA1 az a hash amire vissza akarok állni. Kiteszi a stage indexbe. 
+		git revert SHA1		revert old commit, exact opposite of changes, like a mirror
+	reset to undo many commits	powerful and also very dangerous	
+		git reset --soft SHA1	safest option, not change staging index or working directory, move the pointer back only
+		git reset --mixed SHA1	default, move the pointer back and changes staging index to match repository, not change working directory
+		git reset --hard SHA1	move the pointer back and change staging index and working directory to match repository
 
 
 Stash:
