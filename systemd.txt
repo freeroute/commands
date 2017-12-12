@@ -72,4 +72,3 @@ systemctl --failed --all megmutatja a hibás unitokat, amik nem indultak el
 ezután journalctl -u service -x a kovetkezo lépés a hibakeresésben
 
 
-
