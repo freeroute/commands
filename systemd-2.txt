@@ -1,0 +1,237 @@
+journald configban allithato a journal naplofile default merete. Alapbol
+8 Mb.
+SLA menedzsment - cpu, memoria, disk hasznalat szabalyozasa
+halozat konfiguralas systemd-vel
+
+/sys/fs/sgroup/systemd/
+
+root@Xenon-XR3:~# ls -lh /sys/fs/cgroup/systemd/
+total 0
+-rw-r--r--  1 root root 0 Dec 12 19:12 cgroup.clone_children
+-rw-r--r--  1 root root 0 Dec 12 19:12 cgroup.procs
+-r--r--r--  1 root root 0 Dec 12 19:12 cgroup.sane_behavior
+drwxr-xr-x  2 root root 0 Dec 12 19:12 init.scope
+-rw-r--r--  1 root root 0 Dec 12 19:12 notify_on_release
+-rw-r--r--  1 root root 0 Dec 12 19:12 release_agent
+drwxr-xr-x 70 root root 0 Dec 12 18:56 system.slice
+-rw-r--r--  1 root root 0 Dec 12 19:12 tasks
+drwxr-xr-x  3 root root 0 Dec 12 19:12 user.slice
+
+
+Hármas szintu felosztás
+Slice
+	- unit tipus
+	system.sclice    rendszer
+	user.sclice	 felhasználók
+Scope
+	szervezeti egység, (látókör), mely csoportosítja a szolgáltatások kiszolgálo proseccszeit
+
+Service
+	systemd által vezérelt processz vagy processzek csoportja
+
+systemd-cgls  	listázza a slice-okat,scopokat, serviceket
+systemcd-cgtop	mi mennyi eroforrást eszik, felhasználok és system.systemnél servicenként mutatja
+systemd-cgtop -m memoriahasználat
+systemd-cgtop -c cpu használat
+
+Szabályozás
+
+CPUweight 1024 alapértelmezett
+StartupCPUweight=
+CPUQuota
+
+systemctl show -p CPUWeight apache2 	mutatja
+systemctl set-property --runtime apache CPUEeitht=100	reboot után elveszlik, futásidoben állítom
+	hova tesz? /run/systemd/system-contol/service ...
+
+systemctl show -p CPUWeight apache2
+
+Állandora
+
+systemctl set-property apache2 CPUWeight=100	
+	systemctl status apache2
+	/etc/systemd/system.control/apache ide teszi be
+
+	systemctl daemon-reload 
+
+Accounting -- mérés
+
+systemctl set-property apache2 CPUAccounting=yes
+systemctl daemon-reload
+systemctl status apache2
+
+systemctl set-property apache2 MemoryAccounting=yes MemoryLow=128M MemoryHigh=512M MemoryMax=1G
+systemctl daemon-reload
+systemctl status apache2
+
+Task szabályozás -- processzek szabályozása
+
+systemctl set-property apache2 TaskAccounting=yes TaskMax=200
+systemctl daemon-reload
+systemctl status apache2
+
+Disk I/o szabályozás --csatolási pontonként állítható
+
+systemctl show -p IOWeight apache2
+systemctl set-property apache IOAccounting=yes IOWeight=1000 IODeviceWeight=.....hosszu
+systemctl daemon-reload
+systemctl status apache2
+
+IP cimhasználat korlátozás - adott szoftver milyen IP cimet érhet el, tuzfal beállítást nem 
+helyettesít, de plussz biztonságot ad
+
+systemctl set-property apache2 IPAccounting=yes\ IPAddressAllow=any\ IPAdressdeny=multicat
+konkrét IP címet/tartományt is megadhatok --uj kernel kell hozza
+
+Eszközhasználat korlátozás
+
+systemctl set-property apache2 DevicePolicy=closed\ DeviceAllow=/dev/mapper/vgdebain-www vagy vgdebian-apachelog block device
+
+ezzel korlátozom az apache mit ér el.
+systemctl daemon-reload
+systemctl status apache2
+
+Hálózatbeállítás egységesen
+
+.network unit file-ok
+networkctl, hostnamectl
+systemd-networkd kezeli
+
+networkctl list vagy networkctl
+
+root@Xenon-XR3:~# networkctl status wlan1
+WARNING: systemd-networkd is not running, output will be incomplete.
+
+● 4: wlan1
+       Link File: n/a
+    Network File: n/a
+            Type: wlan
+           State: n/a (unmanaged)
+            Path: pci-0000:00:1d.7-usb-0:2:1.0
+          Driver: ath9k_htc
+          Vendor: Qualcomm Atheros Communications
+           Model: AR9271 802.11n
+      HW Address: 00:c0:ca:82:e5:b6 (ALFA, INC.)
+         Address: 192.168.0.103
+                  fe80::713f:2112:fb27:e0be
+         Gateway: 192.168.0.1 (TP-LINK TECHNOLOGIES CO.,LTD.)
+
+hostnamectl status vagy csak hostnamectl
+
+hostnamectl set-hostname new-name	reboot után is megmarad
+
+ido, idozona, ido-idoszinkron
+
+timedatectl status
+
+timedatectl list-timezones
+timedatectl set-timezone Europe/London
+timedatectl status
+timedatectl set-ntp yes or no	ha nincs networkd még, akkor nem megy.
+
+idozítő --cron helyett
+
+systemctl list-units -t timer
+systemctl cat apt-daily-upgrade.timer
+systemctl cap apt-daily-upgrade.service
+
+root@Xenon-XR3:~# systemctl cat apt-daily-upgrade.timer
+# /lib/systemd/system/apt-daily-upgrade.timer
+[Unit]
+Description=Daily apt upgrade and clean activities
+After=apt-daily.timer
+
+[Timer]
+OnCalendar=*-*-* 6:00
+RandomizedDelaySec=60m
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+
+root@Xenon-XR3:~# systemctl cat apt-daily-upgrade.service -- lefut idoben
+# /lib/systemd/system/apt-daily-upgrade.service
+[Unit]
+Description=Daily apt upgrade and clean activities
+Documentation=man:apt(8)
+ConditionACPower=true
+After=apt-daily.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/apt/apt.systemd.daily install
+KillMode=process
+TimeoutStopSec=900
+
+Időzítés: készítek egy timert, majd ugyanilyen nevu service-t. A timer indítja az ugyanolyan nevu sernicet majd
+
+
+systemctl -H gépnév parancs -- másik gépen hajtom végre a systemctl parancsot
+
+localectl status 	nyelvi beállítások
+root@Xenon-XR3:~# localectl 
+   System Locale: LANG=en_US.UTF-8
+                  LANGUAGE=en_US:en
+       VC Keymap: n/a
+      X11 Layout: hu
+       X11 Model: pc105
+
+keyctl --debianban még nincs
+
+wdctl -watchdog aktiválva akkor megy
+
+root@Xenon-XR3:~# wdctl 
+Device:        /dev/watchdog
+Identity:      iTCO_wdt [version 0]
+Timeout:       30 seconds
+Pre-timeout:    0 seconds
+Timeleft:      30 seconds
+FLAG           DESCRIPTION               STATUS BOOT-STATUS
+KEEPALIVEPING  Keep alive ping reply          1           0
+MAGICCLOSE     Supports magic close char      0           0
+SETTIMEOUT     Set timeout (in seconds)       0           0
+
+loginctl list-sessions	osszes felhasznaloi sessiont mutatja
+loginctl list-users	
+loginctl session-status 1	info az adott sessionrol
+
+Konténerek:
+
+Két eszkoz van rá:
+
+	- nspawn
+	- systemd-machined
+
+nspawn --kb. 256 MB lesz
+
+lvcreate -n machines -L 10G vgdebian --
+mkfs.ext4 -L machines /dev/vgdebian/machines -- formázás
+mkdir -p /var/lib/machines --
+echo "/dev/vgdebian/machines /var/lib/machines ext4 default 0 3" >> /etc/fstab
+mount /var/lib/machines
+apt-y intall debootstrap systemd--container
+debootstrap --include=dbus strecth /var/lib/machines/teszt1\http://hu.archive.eubntu.com
+
+indítás kézzel
+systemd-nspawn -D/var/lib/machines/teszt1
+ps ax
+passwd jleszo beallítas
+exit
+systemd-nspawn -D /var/lib/machines/teszt1	bebootoltam a virtualis gepbe
+systemctl status
+
+cat /lib/systemd/system/systemd-nspawn@.service
+
+itt paramérezem a virtuális gépet.
+
+ln /lib/systemd/system/systemd-nspawn@.service  /lib/systemd/system/systemd-nspawn@teszt1.service
+
+machinectl list --listázza a konténereket
+machinectl show teszt1
+machinectl status teszt1
+journalctl-el le tudom kérdezni a gazda gépen a logokat!!!
+
+du -sch ./* kb. 256 MB lesz a virtualis gep. Nem image! Konyvtár, benne a fileok
+
+Webes felület: Cockpit -- systemd webes feluletrol kezelheto
+kell telepítéshez stretch-backports main non-free contrib
